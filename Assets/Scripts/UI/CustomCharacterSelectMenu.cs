@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -134,7 +135,7 @@ namespace UI
         private IEnumerator Lerp(int direction)
         {
             Debug.Log("lerping ..." + direction);
-            _canMove = false;
+            //_canMove = false;
             float timeElapsed = 0;
             if (direction > 0)
                 SetActiveCharacter(_selectableCharacterList.MoveNext);
@@ -154,56 +155,8 @@ namespace UI
             }
 
             _parent.localPosition = new Vector3(nextItemPosition, _y, _z);
-            _canMove = true;
+            //_canMove = true;
             Debug.Log("end(lerpRight)");
-        }
-
-        private IEnumerator LerpRight()
-        {
-            Debug.Log("lerpRight");
-            _canMove = false;
-            float timeElapsed = 0;
-            var nextItemPosition = -_selectableCharacterList.MoveNext.localPosition.x;
-            SetActiveCharacter(_selectableCharacterList.Current);
-
-            while (timeElapsed < duration)
-            {
-                _parent.localPosition = Vector3.Lerp(
-                    _parent.localPosition,
-                    new Vector3(nextItemPosition, _y, _z),
-                    timeElapsed / duration);
-                timeElapsed += Time.deltaTime;
-                yield return null;
-            }
-
-            _parent.localPosition = new Vector3(nextItemPosition, _y, _z);
-            _canMove = true;
-            Debug.Log("end(lerpRight)");
-        }
-
-        private IEnumerator LerpLeft()
-        {
-            Debug.Log("lerpLeft");
-            _canMove = false;
-            float timeElapsed = 0;
-            _leftItemIndex = currentItemIndex - 1;
-            var prevItemPosition = -_selectableCharacterArray[_leftItemIndex].localPosition.x;
-            SetActiveCharacter(_selectableCharacterArray[_leftItemIndex]);
-            currentItemIndex = _leftItemIndex;
-
-            while (timeElapsed < duration)
-            {
-                _parent.localPosition = Vector3.Lerp(
-                    _parent.localPosition,
-                    new Vector3(prevItemPosition, _y, _z),
-                    timeElapsed / duration);
-                timeElapsed += Time.deltaTime;
-                yield return null;
-            }
-
-            _parent.localPosition = new Vector3(prevItemPosition, _y, _z);
-            _canMove = true;
-            Debug.Log("end(lerpLeft)");
         }
 
         private void MoveInput(Vector2 newMoveDirection)
@@ -243,7 +196,8 @@ namespace UI
         private void Update()
         {
             //highlight selected item 
-            _selectableCharacterArray [currentItemIndex].Rotate (Vector3.up, Time.deltaTime * rotationspeed);
+            _selectableCharacterList.Current.Rotate (Vector3.up, Time.deltaTime * rotationspeed);
+            _selectableCharacterList.Current.localScale = _highlightedscale;
             /*_selectableCharacterArray [currentItemIndex].localScale = Vector3.Lerp (
                 _selectableCharacterArray [currentItemIndex].localScale, 
                 _highlightedscale, 
@@ -277,6 +231,24 @@ namespace UI
         }
 
         #endregion
+        
+        // . t e s t i n g . a w a i t . \\
+        /*private async void AsyncWaitForInput()
+        {
+            Debug.Log("AsyncWaitForInput");
+            var value = await AsyncGetInput();
+            Debug.Log(value);
+        }
+
+        private async Task<String> AsyncGetInput()
+        {
+            Debug.Log("AsyncGetInput");
+            while (!ready)
+            {
+                await Task.Yield();
+            }
+            return "r e t u r n e d a s y n c";
+        }*/
         
         private class NavigationList<T> : List<T>
         {
